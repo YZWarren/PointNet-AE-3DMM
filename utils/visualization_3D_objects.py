@@ -12,6 +12,11 @@ def draw3DPoints(X, title = '3D Scatter plot'):
     X: np.ndarray (3, n) vertices
     """
 
+    x_range = np.max(X[0]) - np.min(X[0])
+    y_range = np.max(X[1]) - np.min(X[1])
+    z_range = np.max(X[2]) - np.min(X[2])
+    max_range = max(x_range, max(y_range, z_range))
+
     trace = go.Scatter3d(
         x=X[0], y=X[1], z=X[2], mode='markers', marker=dict(
             size=1,
@@ -21,12 +26,12 @@ def draw3DPoints(X, title = '3D Scatter plot'):
     )
     layout = go.Layout(title=title,
                        scene = dict(
-                           xaxis = dict(range=[np.min(X[0]) - 100, np.max(X[0]) + 100],),
-                           yaxis = dict(range=[np.min(X[1]) - 100, np.max(X[1]) + 100],),
-                           zaxis = dict(range=[np.min(X[2]) - 100, np.max(X[2]) + 100],),
-                           aspectratio = dict(x=((np.max(X[0]) + 100) - (np.min(X[0]) - 100))/1000,
-                                              y=((np.max(X[1]) + 100) - (np.min(X[1]) - 100))/1000,
-                                              z=((np.max(X[2]) + 100) - (np.min(X[2]) - 100))/1000)
+                           xaxis = dict(range=[np.min(X[0]) - x_range*0.1, np.max(X[0]) + x_range*0.1],),
+                           yaxis = dict(range=[np.min(X[1]) - y_range*0.1, np.max(X[1]) + y_range*0.1],),
+                           zaxis = dict(range=[np.min(X[2]) - z_range*0.1, np.max(X[2]) + z_range*0.1],),
+                           aspectratio = dict(x=((np.max(X[0]) + x_range*0.1) - (np.min(X[0]) - x_range*0.1))/max_range,
+                                              y=((np.max(X[1]) + y_range*0.1) - (np.min(X[1]) - y_range*0.1))/max_range,
+                                              z=((np.max(X[2]) + z_range*0.1) - (np.min(X[2]) - z_range*0.1))/max_range)
                        ),
                        width = 1000,
                        height = 700)
@@ -38,21 +43,29 @@ def draw3DMesh(X,F,title = '3D Scatter plot'):
     X: np.ndarray (3, n) vertices
     F: np.ndarray (3, n) triangles
     """
+
+    x_range = np.max(X[0]) - np.min(X[0])
+    y_range = np.max(X[1]) - np.min(X[1])
+    z_range = np.max(X[2]) - np.min(X[2])
+    max_range = max(x_range, max(y_range, z_range))
+
     x,y,z = X
     i,j,k = F
-    fig = go.Figure(data=[go.Mesh3d(x=x, y=y, z=z,i=i,j=j,k=k, color='lightpink', opacity=0.50)])
+    
 
     layout = go.Layout(title=title,
                        scene = dict(
-                           xaxis = dict(range=[np.min(X[0]) - 100, np.max(X[0]) + 100],),
-                           yaxis = dict(range=[np.min(X[1]) - 100, np.max(X[1]) + 100],),
-                           zaxis = dict(range=[np.min(X[2]) - 100, np.max(X[2]) + 100],),
-                           aspectratio = dict(x=((np.max(X[0]) + 100) - (np.min(X[0]) - 100))/1000,
-                                              y=((np.max(X[1]) + 100) - (np.min(X[1]) - 100))/1000,
-                                              z=((np.max(X[2]) + 100) - (np.min(X[2]) - 100))/1000)
+                           xaxis = dict(range=[np.min(X[0]) - x_range*0.1, np.max(X[0]) + x_range*0.1],),
+                           yaxis = dict(range=[np.min(X[1]) - y_range*0.1, np.max(X[1]) + y_range*0.1],),
+                           zaxis = dict(range=[np.min(X[2]) - z_range*0.1, np.max(X[2]) + z_range*0.1],),
+                           aspectratio = dict(x=((np.max(X[0]) + x_range*0.1) - (np.min(X[0]) - x_range*0.1))/max_range,
+                                              y=((np.max(X[1]) + y_range*0.1) - (np.min(X[1]) - y_range*0.1))/max_range,
+                                              z=((np.max(X[2]) + z_range*0.1) - (np.min(X[2]) - z_range*0.1))/max_range)
                        ),
                        width = 1000,
                        height = 700)
+
+    fig = go.Figure(data=[go.Mesh3d(x=x, y=y, z=z,i=i,j=j,k=k, color='lightpink', opacity=0.50)], layout=layout)
 
     fig.show()
 
