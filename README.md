@@ -1,7 +1,7 @@
 # VAE_3DMM
 
 # Orifinal Car
-![](original_car.gif)
+![](images/original_car.png)
 
 # Reconstructed Car
-![](reconstructed_car.gif)
+![](images/reconstructed_car.png)
