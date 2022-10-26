@@ -2,39 +2,57 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import numpy as np
 import open3d as o3d
+from IPython.display import clear_output
 
 """
 visualization tools
 """
+
+def getLayout(x, y, z, title = '3D Scatter plot'):
+
+    x_range = np.max(x) - np.min(x)
+    y_range = np.max(y) - np.min(y)
+    z_range = np.max(z) - np.min(z)
+    max_range = max(x_range, max(y_range, z_range))
+
+    x_min, x_max = np.min(x) - x_range*0.1, np.max(x) + x_range*0.1
+    y_min, y_max = np.min(y) - y_range*0.1, np.max(y) + y_range*0.1
+    z_min, z_max = np.min(z) - z_range*0.1, np.max(z) + z_range*0.1
+
+    return go.Layout(title=title,
+            scene = dict(
+            xaxis = dict(range=[x_min, x_max],),
+            yaxis = dict(range=[y_min, y_max],),
+            zaxis = dict(range=[z_min, z_max],),
+            aspectratio = dict(x=(x_max - x_min)/max_range*2,
+                                y=(y_max - y_min)/max_range*2,
+                                z=(z_max - z_min)/max_range*2)
+            ),
+            width = 1000,
+            height = 700)
+
+def getScatterTrace(X, visible = True):
+    return go.Scatter3d(
+                visible=visible,
+                x=X[0],
+                y=X[1],
+                z=X[2],
+                mode='markers', marker=dict(
+                    size=1.5,
+                    color=X[1]**2 + X[2]**2,  # set color to an array/list of desired values
+                    colorscale='Viridis'
+                )
+            )
 
 def draw3DPoints(X, title = '3D Scatter plot'):
     """
     X: np.ndarray (3, n) vertices
     """
 
-    x_range = np.max(X[0]) - np.min(X[0])
-    y_range = np.max(X[1]) - np.min(X[1])
-    z_range = np.max(X[2]) - np.min(X[2])
-    max_range = max(x_range, max(y_range, z_range))
+    trace = getScatterTrace(X)
 
-    trace = go.Scatter3d(
-        x=X[0], y=X[1], z=X[2], mode='markers', marker=dict(
-            size=1,
-            color='blue',  # set color to an array/list of desired values
-            colorscale='Viridis'
-        )
-    )
-    layout = go.Layout(title=title,
-                       scene = dict(
-                           xaxis = dict(range=[np.min(X[0]) - x_range*0.1, np.max(X[0]) + x_range*0.1],),
-                           yaxis = dict(range=[np.min(X[1]) - y_range*0.1, np.max(X[1]) + y_range*0.1],),
-                           zaxis = dict(range=[np.min(X[2]) - z_range*0.1, np.max(X[2]) + z_range*0.1],),
-                           aspectratio = dict(x=((np.max(X[0]) + x_range*0.1) - (np.min(X[0]) - x_range*0.1))/max_range,
-                                              y=((np.max(X[1]) + y_range*0.1) - (np.min(X[1]) - y_range*0.1))/max_range,
-                                              z=((np.max(X[2]) + z_range*0.1) - (np.min(X[2]) - z_range*0.1))/max_range)
-                       ),
-                       width = 1000,
-                       height = 700)
+    layout = getLayout(X[0], X[1], X[2], title)
+
     fig = go.Figure(data=[trace], layout=layout)
     fig.show()
 
@@ -44,26 +62,10 @@ def draw3DMesh(X,F,title = '3D Scatter plot'):
     F: np.ndarray (3, n) triangles
     """
 
-    x_range = np.max(X[0]) - np.min(X[0])
-    y_range = np.max(X[1]) - np.min(X[1])
-    z_range = np.max(X[2]) - np.min(X[2])
-    max_range = max(x_range, max(y_range, z_range))
-
     x,y,z = X
     i,j,k = F
     
-
-    layout = go.Layout(title=title,
-                       scene = dict(
-                           xaxis = dict(range=[np.min(X[0]) - x_range*0.1, np.max(X[0]) + x_range*0.1],),
-                           yaxis = dict(range=[np.min(X[1]) - y_range*0.1, np.max(X[1]) + y_range*0.1],),
-                           zaxis = dict(range=[np.min(X[2]) - z_range*0.1, np.max(X[2]) + z_range*0.1],),
-                           aspectratio = dict(x=((np.max(X[0]) + x_range*0.1) - (np.min(X[0]) - x_range*0.1))/max_range,
-                                              y=((np.max(X[1]) + y_range*0.1) - (np.min(X[1]) - y_range*0.1))/max_range,
-                                              z=((np.max(X[2]) + z_range*0.1) - (np.min(X[2]) - z_range*0.1))/max_range)
-                       ),
-                       width = 1000,
-                       height = 700)
+    layout =  getLayout(x,y,z, title)
 
     fig = go.Figure(data=[go.Mesh3d(x=x, y=y, z=z,i=i,j=j,k=k, color='lightpink', opacity=0.50)], layout=layout)
 
@@ -80,6 +82,47 @@ def save3DPoints(X):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     return fig
+
+
+# Create figure
+def draw3DpointsSlider(X_list, feat_idx, obj_idx):
+    """
+    X_list (np.ndarray): list of data to plot (N_step * N_obj * 3 * N_points)
+    feat_idx (int): the index of the feature in feature space
+    obj_idx (int): the index of the object to examine
+    """
+    fig = go.Figure(layout = getLayout(X_list[:, 0], X_list[:, 1], X_list[:, 2], title = "Feature No.%d" % (feat_idx)))
+    # Add traces, one for each slider step
+
+    for X in X_list:
+        X = X[obj_idx]
+        fig.add_trace(getScatterTrace(X, visible = False))
+
+    # Make 10th trace visible
+    fig.data[0].visible = True
+
+    # Create and add slider
+    steps = []
+
+    for i in range(len(fig.data)):
+        step = dict(
+            method="update",
+            args=[{"visible": [False] * len(fig.data)}],  # layout attribute
+        )
+        step["args"][0]["visible"][i] = True  # Toggle i'th trace to "visible"
+        steps.append(step)
+
+    sliders = [dict(
+        active=50,
+        currentvalue={"prefix": "Frequency: "},
+        pad={"t": 50},
+        steps=steps
+    )]
+
+    fig.update_layout(sliders=sliders)
+
+    fig.show()
+
 
 
 def comparePointClouds(X, Y, title = '3D Point Cloud'):

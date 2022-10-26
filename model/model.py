@@ -87,6 +87,46 @@ class PointNet_AE(nn.Module):
 
         return reconstructed_points , global_feat
 
+class PointNet_AE_lowerDim(nn.Module):
+    """ Autoencoder for Point Cloud 
+    Input: Batch of Point Cloud B x 3 x N
+    Output: reconstructed points
+    """
+    def __init__(self, point_dim, num_points, latent_dim):
+        super(PointNet_AE, self).__init__()
+
+        self.encoder = PointNet_Encoder(point_dim)
+        self.decoder = Decoder(point_dim, num_points)
+
+        self.fc_encode_64 = nn.Sequential(
+            nn.Linear(in_features=1024, out_features=256),
+            nn.BatchNorm1d(256),
+            nn.ReLU,
+            nn.Linear(in_features=256, out_features=latent_dim)
+        )
+
+        self.fc_decode_1024 = nn.Sequential(
+            nn.Linear(in_features=latent_dim, out_features=256),
+            nn.BatchNorm1d(256),
+            nn.ReLU,
+            nn.Linear(in_features=256, out_features=1024),
+            nn.BatchNorm1d(1024),
+            nn.ReLU,
+        )
+
+    def forward(self, x):
+        # encode
+        global_feat = self.encoder(x)
+
+        latent_space = self.fc_encode_64(global_feat)
+
+        decoded_global_feat = self.fc_decode_1024(latent_space)
+
+        # decode
+        reconstructed_points = self.decoder(decoded_global_feat)
+
+        return reconstructed_points , global_feat
+
 class PointNet_VAE(nn.Module):
     """ Autoencoder for Point Cloud 
     Input: Batch of Point Cloud B x 3 x N
