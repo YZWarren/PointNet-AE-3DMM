@@ -93,7 +93,7 @@ class PointNet_AE_lowerDim(nn.Module):
     Output: reconstructed points
     """
     def __init__(self, point_dim, num_points, latent_dim):
-        super(PointNet_AE, self).__init__()
+        super(PointNet_AE_lowerDim, self).__init__()
 
         self.encoder = PointNet_Encoder(point_dim)
         self.decoder = Decoder(point_dim, num_points)
