@@ -101,17 +101,17 @@ class PointNet_AE_lowerDim(nn.Module):
         self.fc_encode_64 = nn.Sequential(
             nn.Linear(in_features=1024, out_features=256),
             nn.BatchNorm1d(256),
-            nn.ReLU,
+            nn.ReLU(),
             nn.Linear(in_features=256, out_features=latent_dim)
         )
 
         self.fc_decode_1024 = nn.Sequential(
             nn.Linear(in_features=latent_dim, out_features=256),
             nn.BatchNorm1d(256),
-            nn.ReLU,
+            nn.ReLU(),
             nn.Linear(in_features=256, out_features=1024),
             nn.BatchNorm1d(1024),
-            nn.ReLU,
+            nn.ReLU(),
         )
 
     def forward(self, x):
