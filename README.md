@@ -1,4 +1,4 @@
-# VAE_3DMM
+# PointNet AE and 3D Morphable Model
 
 # Orifinal Car
 ![](images/original_car.png)
