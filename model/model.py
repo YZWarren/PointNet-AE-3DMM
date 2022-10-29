@@ -98,14 +98,14 @@ class PointNet_AE_lowerDim(nn.Module):
         self.encoder = PointNet_Encoder(point_dim)
         self.decoder = Decoder(point_dim, num_points)
 
-        self.fc_encode_64 = nn.Sequential(
+        self.fc_encode = nn.Sequential(
             nn.Linear(in_features=1024, out_features=256),
             nn.BatchNorm1d(256),
             nn.ReLU(),
             nn.Linear(in_features=256, out_features=latent_dim)
         )
 
-        self.fc_decode_1024 = nn.Sequential(
+        self.fc_decode = nn.Sequential(
             nn.Linear(in_features=latent_dim, out_features=256),
             nn.BatchNorm1d(256),
             nn.ReLU(),
@@ -118,14 +118,14 @@ class PointNet_AE_lowerDim(nn.Module):
         # encode
         global_feat = self.encoder(x)
 
-        latent_space = self.fc_encode_64(global_feat)
+        latent_space = self.fc_encode(global_feat)
 
-        decoded_global_feat = self.fc_decode_1024(latent_space)
+        decoded_global_feat = self.fc_decode(latent_space)
 
         # decode
         reconstructed_points = self.decoder(decoded_global_feat)
 
-        return reconstructed_points , global_feat
+        return reconstructed_points, latent_space
 
 class PointNet_VAE(nn.Module):
     """ Autoencoder for Point Cloud 
