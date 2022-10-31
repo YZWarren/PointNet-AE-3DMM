@@ -91,7 +91,7 @@ def draw3DpointsSlider(X_list, feat_idx, obj_idx):
     feat_idx (int): the index of the feature in feature space
     obj_idx (int): the index of the object to examine
     """
-    fig = go.Figure(layout = getLayout(X_list[:, 0], X_list[:, 1], X_list[:, 2], title = "Feature No.%d" % (feat_idx)))
+    fig = go.Figure(layout = getLayout(X_list[:, :, 0], X_list[:, :, 1], X_list[:, :, 2], title = "Feature No.%d" % (feat_idx)))
     # Add traces, one for each slider step
 
     for X in X_list:
