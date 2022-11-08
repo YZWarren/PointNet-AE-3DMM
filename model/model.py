@@ -99,17 +99,17 @@ class PointNet_AE_lowerDim(nn.Module):
         self.decoder = Decoder(point_dim, num_points)
 
         self.fc_encode = nn.Sequential(
-            nn.Linear(in_features=1024, out_features=256),
-            nn.BatchNorm1d(256),
+            nn.Linear(in_features=1024, out_features=512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
-            nn.Linear(in_features=256, out_features=latent_dim)
+            nn.Linear(in_features=512, out_features=latent_dim)
         )
 
         self.fc_decode = nn.Sequential(
-            nn.Linear(in_features=latent_dim, out_features=256),
-            nn.BatchNorm1d(256),
+            nn.Linear(in_features=latent_dim, out_features=512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
-            nn.Linear(in_features=256, out_features=1024),
+            nn.Linear(in_features=512, out_features=1024),
             nn.BatchNorm1d(1024),
             nn.ReLU(),
         )
