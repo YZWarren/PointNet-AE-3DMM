@@ -45,7 +45,7 @@ parser.add_argument('--var_range', type=float, default=1.0, help='Range of Varia
 FLAGS = parser.parse_args()
 
 DATASET = FLAGS.dataset
-DATA_CLASS = cate_to_synsetid[FLAGS.data_class]
+DATA_CLASS = cate_to_synsetid[FLAGS.data_class] if DATASET == 'shapenet' else FLAGS.data_class
 NUM_POINT = FLAGS.num_point
 VAR_RANGE = FLAGS.var_range
 
@@ -134,10 +134,9 @@ def preprocess_and_save(folder, save_path):
 if __name__ == "__main__":
     # download dataset if dataset does not exist
     if not os.path.exists(os.path.join("../data/raw", DATASET)):
-        os.makedirs("../data/raw")
         os.system("bash ./download_" + DATASET + ".sh")
 
-    data_folder = os.path.join("../data/raw", DATASET, DATA_CLASS, 'points/')
+    data_folder = os.path.join("../data/raw", DATASET, DATA_CLASS, 'points/' if DATASET == 'shapenet' else '')
     save_folder = os.path.join("../data/preprocessed", DATASET, FLAGS.data_class)
 
     preprocess_and_save(folder = data_folder, save_path = save_folder)
