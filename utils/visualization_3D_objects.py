@@ -101,7 +101,7 @@ def save3DPoints(X):
 
 
 # Create figure
-def draw3DpointsSlider(X_list, feat_idx, obj_idx):
+def draw3DpointsSlider(X_list, feat_idx, obj_idx, show = True):
     """
     X_list (np.ndarray): list of data to plot (N_step * N_obj * 3 * N_points)
     feat_idx (int): the index of the feature in feature space
@@ -137,7 +137,7 @@ def draw3DpointsSlider(X_list, feat_idx, obj_idx):
 
     fig.update_layout(sliders=sliders)
 
-    fig.show()
+    if show: fig.show()
     return fig
 
 def comparePointClouds(X, Y, title = '3D Point Cloud', show = False):

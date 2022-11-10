@@ -1,38 +1,21 @@
 import argparse
 import os, sys
-sys.path.append('../')
-
 import time
-import copy
-import math
 import pickle
-import statistics
-from matplotlib.image import imread
-
 import numpy as np
-import pandas as pd
-import open3d as o3d
-import torchvision
-import pytorch3d
-from tqdm import tqdm
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-
+sys.path.append('../')
 # Import pytorch dependencies
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torch.nn.modules.utils import _single, _pair, _triple
-from torchsummary import summary
 
 from pytorch3d.loss import chamfer_distance
 
 # Import toolkits
 from utils.visualization_3D_objects import *
 
-from nn.model import *
+from nn.pointnetae import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default='shapenet', help='dataset to use [default: shapenet]')
@@ -43,8 +26,7 @@ parser.add_argument('--num_point', type=int, default=2048, help='Point Number [d
 parser.add_argument('--max_epoch', type=int, default=201, help='Epoch to run [default: 201]')
 parser.add_argument('--log_epoch', type=int, default=10, help='Epoch to log results [default: 10]')
 parser.add_argument('--batch_size', type=int, default=16, help='Batch Size during training [default: 16]')
-parser.add_argument('--initial_lr', type=float, default=1e-4, help='Initial learning rate [default: 1e-5]')
-parser.add_argument('--momentum', type=float, default=0.9, help='Initial learning rate [default: 0.9]')
+parser.add_argument('--initial_lr', type=float, default=1e-4, help='Initial learning rate [default: 1e-4]')
 # parser.add_argument('--optimizer', default='adam', help='adam or momentum [default: adam]')
 parser.add_argument('--decay_step', type=int, default=30, help='Decay step for lr decay [default: 30]')
 parser.add_argument('--decay_rate', type=float, default=0.7, help='Decay rate for lr decay [default: 0.7]')
@@ -58,7 +40,6 @@ CHECKPOINT_PATH = FLAGS.checkpoint_path
 NUM_POINT = FLAGS.num_point
 BATCH_SIZE = FLAGS.batch_size
 INITIAL_LR = FLAGS.initial_lr
-MOMENTUM = FLAGS.momentum
 EPOCHS = FLAGS.max_epoch
 LOG_EPOCHS = FLAGS.log_epoch
 DECAY_STEPS = FLAGS.decay_step
