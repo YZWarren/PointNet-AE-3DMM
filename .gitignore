@@ -1,3 +1,4 @@
-VAE_basics
 data
-saved_model
+saved_nn
+train/runs
+train/image

@@ -8,9 +8,6 @@ import numpy as np
 import open3d as o3d
 from tqdm import tqdm
 
-sys.path.append('/home/warrenzhao/PointNet-AE-3DMM')
-from utils.read_object import *
-
 # taken from https://github.com/optas/latent_3d_points/blob/8e8f29f8124ed5fc59439e8551ba7ef7567c9a37/src/in_out.py
 synsetid_to_cate = {
     '02691156': 'airplane', '02773838': 'bag', '02801938': 'basket',
@@ -38,14 +35,14 @@ synsetid_to_cate = {
 cate_to_synsetid = {v: k for k, v in synsetid_to_cate.items()}
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', default='shapenet', help='dataset to use (only support shapenet now) [default: shapenet]')
-parser.add_argument('--data_class', default='car', help='the class of dataset to use [default: shapenet]')
+parser.add_argument('--dataset', default='shapenet', help='dataset to use [default: shapenet]')
+parser.add_argument('--category', default='car', help='the class of dataset to use [default: shapenet]')
 parser.add_argument('--num_point', type=int, default=2048, help='Point Number [default: 2048]')
 parser.add_argument('--var_range', type=float, default=1.0, help='Range of Variance Values [default: 1.0]')
 FLAGS = parser.parse_args()
 
 DATASET = FLAGS.dataset
-DATA_CLASS = cate_to_synsetid[FLAGS.data_class] if DATASET == 'shapenet' else FLAGS.data_class
+CATEGORY = cate_to_synsetid[FLAGS.category] if DATASET == 'shapenet' else FLAGS.category
 NUM_POINT = FLAGS.num_point
 VAR_RANGE = FLAGS.var_range
 
@@ -136,7 +133,7 @@ if __name__ == "__main__":
     if not os.path.exists(os.path.join("../data/raw", DATASET)):
         os.system("bash ./download_" + DATASET + ".sh")
 
-    data_folder = os.path.join("../data/raw", DATASET, DATA_CLASS, 'points/' if DATASET == 'shapenet' else '')
-    save_folder = os.path.join("../data/preprocessed", DATASET, FLAGS.data_class)
+    data_folder = os.path.join("../data/raw", DATASET, CATEGORY, 'points/' if DATASET == 'shapenet' else '')
+    save_folder = os.path.join("../data/preprocessed", DATASET, FLAGS.category)
 
     preprocess_and_save(folder = data_folder, save_path = save_folder)

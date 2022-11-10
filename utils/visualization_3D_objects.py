@@ -1,3 +1,4 @@
+import os
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,30 +32,45 @@ def getLayout(x, y, z, title = '3D Scatter plot'):
             width = 1000,
             height = 700)
 
-def getScatterTrace(X, visible = True):
+def getScatterTrace(X, point_size = 1.5, visible = True, color = None):
+    color = X[1]**2 + X[2]**2 + 0.1*X[0]**2 if color == None else color
     return go.Scatter3d(
                 visible=visible,
                 x=X[0],
                 y=X[1],
                 z=X[2],
                 mode='markers', marker=dict(
-                    size=1.5,
-                    color=X[1]**2 + X[2]**2,  # set color to an array/list of desired values
+                    size=point_size,
+                    color=color,  # set color to an array/list of desired values
                     colorscale='Viridis'
                 )
             )
 
-def draw3DPoints(X, title = '3D Scatter plot'):
+def draw3DPoints(X, point_size = 1.5, title = '3D Scatter plot', show = False):
     """
     X: np.ndarray (3, n) vertices
     """
 
-    trace = getScatterTrace(X)
+    trace = getScatterTrace(X, point_size)
 
     layout = getLayout(X[0], X[1], X[2], title)
 
     fig = go.Figure(data=[trace], layout=layout)
-    fig.show()
+    if show: fig.show()
+    return fig
+
+def save3DPointsImage(fig, camera = None, save_path = "image", title = "Scatter3D" ):
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    
+    if camera == None:      
+        camera = dict(
+            up=dict(x=0, y=1, z=0),
+            center=dict(x=0, y=0, z=0),
+            eye=dict(x=1, y=1, z=-2)
+        )
+    fig.update_layout(scene_camera=camera, title=title)
+    fig.write_image(os.path.join(save_path, title + ".png"))
 
 def draw3DMesh(X,F,title = '3D Scatter plot'):
     """
@@ -122,10 +138,9 @@ def draw3DpointsSlider(X_list, feat_idx, obj_idx):
     fig.update_layout(sliders=sliders)
 
     fig.show()
+    return fig
 
-
-
-def comparePointClouds(X, Y, title = '3D Point Cloud'):
+def comparePointClouds(X, Y, title = '3D Point Cloud', show = False):
     '''
     compare two point clouds
     @param X (np.ndarray(float, shape = (3, n)): input source point cloud
@@ -147,7 +162,8 @@ def comparePointClouds(X, Y, title = '3D Point Cloud'):
     )
     layout = go.Layout(title=title)
     fig = go.Figure(data=[trace_X, trace_Y], layout=layout)
-    fig.show()
+    if show: fig.show()
+    return fig
 
 def surfaceRecons(s_fit, alpha):
     """
