@@ -1,11 +1,12 @@
 import argparse
 import os, sys
-sys.path.append('../')
-
 import time
-
 import numpy as np
 import matplotlib.pyplot as plt
+
+import gitpath
+HOME_PATH = gitpath.root()
+sys.path.append(HOME_PATH)
 
 # Import pytorch dependencies
 import torch
@@ -21,10 +22,10 @@ from nn.pointnetae import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default='shapenet', help='Dataset to use [default: shapenet]')
-parser.add_argument('--model_name', default='VAE_global_feat', help='Model name [default: VAE_global_feat]')
+parser.add_argument('--model_name', default='global_feat_VAE', help='Model name [default: global_feat_VAE]')
 parser.add_argument('--point_decoder_name', default='PointNetAE', help='Point cloud decoder name [default: PointNetAE]')
 parser.add_argument('--category', default='car', help='Which single class to train on [default: car]')
-parser.add_argument('--checkpoint_path', default='../saved_nn', help='Path to save model checkpoint [default: ../saved_nn]')
+parser.add_argument('--checkpoint_path', default=os.path.join(HOME_PATH, 'saved_nn'), help='Path to save model checkpoint [default: repo_root/saved_nn]')
 parser.add_argument('--num_point', type=int, default=2048, help='Number of Points [default: 2048]')
 parser.add_argument('--input_dim', type=int, default=1024, help='Input vector dimension [default: 1024]')
 parser.add_argument('--inter_dim', type=int, default=512, help='Intermediate feature space dimension [default: 1024]')
@@ -41,9 +42,9 @@ parser.add_argument('--resume', choices=['yes', 'no'], default='no', help='Resum
 FLAGS = parser.parse_args()
 
 DATASET = FLAGS.dataset
-MODEL_NAME = FLAGS.model_name
-PCDECODER = FLAGS.point_decoder_name
-DATA_PATH = os.path.join("../evaluate_model/", DATASET +"_" + FLAGS.category + "_global_feat.csv")
+MODEL_NAME = FLAGS.model_name + '_' + FLAGS.category
+PCDECODER = FLAGS.point_decoder_name + '_' + FLAGS.category
+DATA_PATH = os.path.join(HOME_PATH, 'evaluate_model', DATASET, FLAGS.category , "global_feat.csv")
 CHECKPOINT_PATH = FLAGS.checkpoint_path
 NUM_POINT = FLAGS.num_point
 INPUT_DIM = FLAGS.input_dim
@@ -152,7 +153,7 @@ for i in range(START_EPOCH, EPOCHS):
         inputs = inputs.float().to(device)
 
         # compute the output and loss
-        outputs = model(inputs)
+        outputs, _ = model(inputs)
 
         recon_loss = criterion(outputs, inputs)
         loss = recon_loss + BETA * model.kl
@@ -188,7 +189,7 @@ for i in range(START_EPOCH, EPOCHS):
             # copy inputs to device
             inputs = inputs.float().to(device)
             # compute the output and loss
-            outputs = model(inputs)
+            outputs, _ = model(inputs)
 
             recon_loss = criterion(outputs, inputs)
             loss = recon_loss + model.kl
@@ -238,7 +239,7 @@ plt.legend()
 plt.xlabel('epoch')
 plt.yscale('log')
 plt.ylabel('Loss')
-plt.savefig(MODEL_NAME + '_learning_curve.png')
+plt.savefig(os.path.join('learning_curves', MODEL_NAME + '_learning_curve.png'))
 
 writer.close()
 

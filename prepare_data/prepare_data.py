@@ -56,18 +56,15 @@ def read_pointcloud(filename):
 
     return pcd
 
-def prepare_point_cloud(filename, var_range=VAR_RANGE, target_size=NUM_POINT):
+def prepare_point_cloud(X, var_range=VAR_RANGE, target_size=NUM_POINT):
     """
     preprocessing point cloud
-    @param filename: mesh file name
+    @param X: point cloud in np.array (N, 3)
     @param var_range: float
     @param target_size: int
-    @return: downsampled np array of shape (3, target_szie)
+    @return: downsampled np array of shape (3, target_size)
     """
     # downsample to target size
-    pcd = o3d.io.read_point_cloud(filename, format='xyz')
-    X = np.asarray(pcd.points)
-
     idx_lst = random.sample(range(X.shape[0]), target_size)
     X = X[idx_lst]
     
@@ -88,8 +85,11 @@ def preprocessAll(filenames):
     
     pcd_all = []
     for filename in tqdm(filenames):
-        pcd = prepare_point_cloud(filename)
-        pcd_all.append(pcd)
+        pcd = o3d.io.read_point_cloud(filename, format='xyz')
+        X = np.asarray(pcd.points)
+        if (X.shape[0] > NUM_POINT):
+            pcd = prepare_point_cloud(X)
+            pcd_all.append(pcd)
 
     return pcd_all
 
@@ -115,6 +115,7 @@ def preprocess_and_save(folder, save_path):
     filenames = listFileNames(folder)
 
     data_all = preprocessAll(filenames)
+    print("processed %d/%d objects"%(len(data_all), len(filenames)))
 
     train_idx = random.sample(range(len(data_all)), (int)(len(data_all) * 9 / 10))
     test_idx = [x for x in range(len(data_all)) if x not in train_idx]

@@ -4,7 +4,10 @@ import time
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append('../')
+
+import gitpath
+HOME_PATH = gitpath.root()
+sys.path.append(HOME_PATH)
 # Import pytorch dependencies
 import torch
 import torch.optim as optim
@@ -21,7 +24,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default='shapenet', help='dataset to use [default: shapenet]')
 parser.add_argument('--model_name', default='PointNetAE', help='Model name [default: PointNetAE]')
 parser.add_argument('--category', default='car', help='Which single class to train on [default: car]')
-parser.add_argument('--checkpoint_path', default='../saved_nn', help='Path to save model checkpoint [default: ../saved_nn]')
+parser.add_argument('--checkpoint_path', default=os.path.join(HOME_PATH, 'saved_nn'), help='Path to save model checkpoint [default: repo_root/saved_nn]')
 parser.add_argument('--num_point', type=int, default=2048, help='Point Number [default: 2048]')
 parser.add_argument('--max_epoch', type=int, default=201, help='Epoch to run [default: 201]')
 parser.add_argument('--log_epoch', type=int, default=10, help='Epoch to log results [default: 10]')
@@ -35,7 +38,7 @@ FLAGS = parser.parse_args()
 
 DATASET = FLAGS.dataset
 MODEL_NAME = FLAGS.model_name
-DATA_PATH = os.path.join("../data/preprocessed", DATASET, FLAGS.category)
+DATA_PATH = os.path.join(HOME_PATH, 'data/preprocessed', DATASET, FLAGS.category)
 CHECKPOINT_PATH = FLAGS.checkpoint_path
 NUM_POINT = FLAGS.num_point
 BATCH_SIZE = FLAGS.batch_size
@@ -100,7 +103,7 @@ train_loss_lst = []
 valid_loss_lst = []
 
 if RESUME:
-    checkpoint = torch.load(os.path.join(CHECKPOINT_PATH, MODEL_NAME + '.pth'))
+    checkpoint = torch.load(os.path.join(CHECKPOINT_PATH, MODEL_NAME +'_' + FLAGS.category + '.pth'))
 
     model.load_state_dict(checkpoint['state_dict'])
     
@@ -217,7 +220,7 @@ for i in range(START_EPOCH, EPOCHS):
                 'best_loss': best_loss,
                 'train_loss_lst': train_loss_lst,
                 'valid_loss_lst': valid_loss_lst}
-        torch.save(state, os.path.join(CHECKPOINT_PATH, MODEL_NAME + '.pth'))
+        torch.save(state, os.path.join(CHECKPOINT_PATH, MODEL_NAME +'_' + FLAGS.category + '.pth'))
         
     print('')
 
@@ -233,7 +236,7 @@ plt.legend()
 plt.xlabel('epoch')
 plt.yscale('log')
 plt.ylabel('Loss')
-plt.savefig(MODEL_NAME + '_learning_curve.png')
+plt.savefig(os.path.join('learning_curves', MODEL_NAME + '_learning_curve.png'))
 
 writer.close()
 
