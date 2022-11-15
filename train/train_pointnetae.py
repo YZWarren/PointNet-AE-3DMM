@@ -37,7 +37,7 @@ parser.add_argument('--resume', choices=['yes', 'no'], default='no', help='Resum
 FLAGS = parser.parse_args()
 
 DATASET = FLAGS.dataset
-MODEL_NAME = FLAGS.model_name
+MODEL_NAME = FLAGS.model_name +'_' + FLAGS.category
 DATA_PATH = os.path.join(HOME_PATH, 'data/preprocessed', DATASET, FLAGS.category)
 CHECKPOINT_PATH = FLAGS.checkpoint_path
 NUM_POINT = FLAGS.num_point
@@ -103,7 +103,7 @@ train_loss_lst = []
 valid_loss_lst = []
 
 if RESUME:
-    checkpoint = torch.load(os.path.join(CHECKPOINT_PATH, MODEL_NAME +'_' + FLAGS.category + '.pth'))
+    checkpoint = torch.load(os.path.join(CHECKPOINT_PATH, MODEL_NAME  + '.pth'))
 
     model.load_state_dict(checkpoint['state_dict'])
     
@@ -220,7 +220,7 @@ for i in range(START_EPOCH, EPOCHS):
                 'best_loss': best_loss,
                 'train_loss_lst': train_loss_lst,
                 'valid_loss_lst': valid_loss_lst}
-        torch.save(state, os.path.join(CHECKPOINT_PATH, MODEL_NAME +'_' + FLAGS.category + '.pth'))
+        torch.save(state, os.path.join(CHECKPOINT_PATH, MODEL_NAME + '.pth'))
         
     print('')
 
