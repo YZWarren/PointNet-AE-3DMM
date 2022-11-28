@@ -72,6 +72,17 @@ def save3DPointsImage(fig, camera = None, save_path = "image", title = "Scatter3
     fig.update_layout(scene_camera=camera, title=title)
     fig.write_image(os.path.join(save_path, title + ".png"))
 
+def saveList3DPointsImage(X_list, feat_idx, obj_idx, show = True):
+    """
+    X_list (np.ndarray): list of data to plot (N_step * N_obj * 3 * N_points)
+    feat_idx (int): the index of the feature in feature space
+    obj_idx (int): the index of the object to examine
+    """
+
+    for X in X_list:
+        X = X[obj_idx]
+        fig.add_trace(getScatterTrace(X, visible = False))
+
 def draw3DMesh(X,F,title = '3D Scatter plot'):
     """
     X: np.ndarray (3, n) vertices
