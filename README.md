@@ -3,6 +3,9 @@
 Morphable Model
 ![](images/interpolation_car.gif)
 
+Random Samples
+![](images/random_sample.png)
+
 Orifinal Car
 ![](images/original_car.png)
 
