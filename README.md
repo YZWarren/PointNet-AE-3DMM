@@ -1,7 +1,10 @@
 # PointNet AE and 3D Morphable Model
 
-# Orifinal Car
+Morphable Model
+![](images/interpolation_car.gif)
+
+Orifinal Car
 ![](images/original_car.png)
 
-# Reconstructed Car
+Reconstructed Car
 ![](images/reconstructed_car.png)
