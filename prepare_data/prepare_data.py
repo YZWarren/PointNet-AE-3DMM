@@ -12,6 +12,8 @@ import gitpath
 HOME_PATH = gitpath.root()
 sys.path.append(HOME_PATH)
 
+from utils.read_object import *
+
 # taken from https://github.com/optas/latent_3d_points/blob/8e8f29f8124ed5fc59439e8551ba7ef7567c9a37/src/in_out.py
 synsetid_to_cate = {
     '02691156': 'airplane', '02773838': 'bag', '02801938': 'basket',
@@ -90,6 +92,8 @@ def preprocessAll(filenames):
     pcd_all = []
     for filename in tqdm(filenames):
         pcd = o3d.io.read_point_cloud(filename, format='xyz')
+        if DATASET == 'modelnet40':
+            pcd = read_pointcloud(filename)
         X = np.asarray(pcd.points)
         if (X.shape[0] > NUM_POINT):
             pcd = prepare_point_cloud(X)
