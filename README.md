@@ -11,3 +11,6 @@ Orifinal Car
 
 Reconstructed Car
 ![](images/reconstructed_car.png)
+
+# Build environment and install required packages
+conda env create -f environment.yml
