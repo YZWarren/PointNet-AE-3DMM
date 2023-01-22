@@ -1,6 +1,6 @@
 # PointNet AE and 3D Morphable Model
 
-Morphable Model
+Interpolation between cars
 ![](images/interpolation_car.gif)
 
 Random Samples
@@ -11,6 +11,9 @@ Orifinal Car
 
 Reconstructed Car
 ![](images/reconstructed_car.png)
+
+Model structure
+![](images/AE_VAE_structure.png)
 
 # Build environment and install required packages
 ## Dependency
