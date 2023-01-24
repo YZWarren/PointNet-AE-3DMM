@@ -1,4 +1,5 @@
 # Build environment and install required packages
+This is in random_pose
 ## Dependency
 The code has been tested on Ubuntu 20.04, PyTorch 1.9.1, PyTorch3d 0.7.0, CUDA 10.1
 
