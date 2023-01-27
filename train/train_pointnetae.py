@@ -79,7 +79,7 @@ else:
     print("Run on CPU...")
 
 # Model Definition  
-model = PointNet_AE(3, NUM_POINT)
+model = PointNet_AE()
 model = model.to(device)
 
 # Check if on GPU

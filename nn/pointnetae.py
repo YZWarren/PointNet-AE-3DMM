@@ -6,12 +6,12 @@ from torchsummary import summary
 class PointNet_Encoder(nn.Module):
     """ PointNet Encoder for Point Cloud (following PointNet by Charles Q. et al.)
     Input: Batch of Point Cloud B x 3 x N
-    Output: global features B x 1024
+    Output: global features B x 1088 x N
     """
-    def __init__(self, point_dim):
+    def __init__(self):
         super(PointNet_Encoder, self).__init__()
 
-        self.conv1 = nn.Conv1d(in_channels=point_dim, out_channels=64, kernel_size=1)
+        self.conv1 = nn.Conv1d(in_channels=3, out_channels=64, kernel_size=1)
         self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=1)
         self.conv3 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=1)
         self.conv4 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=1)
@@ -26,8 +26,12 @@ class PointNet_Encoder(nn.Module):
 
     
     def forward(self, x):
+        n_pts = x.shape[2]
         #encoder, MLP
         x = F.relu(self.bn1(self.conv1(x)))
+
+        pointfeat = x
+
         x = F.relu(self.bn2(self.conv2(x)))
         x = F.relu(self.bn3(self.conv3(x)))
         x = F.relu(self.bn4(self.conv4(x)))
@@ -35,49 +39,45 @@ class PointNet_Encoder(nn.Module):
 
         # do max pooling 
         x = torch.max(x, 2, keepdim=True)[0]
-        x = x.view(-1, 1024)
+        x = x.view(-1, 1024, 1).repeat(1,1,n_pts)
+        x = torch.cat([x, pointfeat], 1)
         # get the global embedding
         return x
 
 class Decoder(nn.Module):
-    """ Decoder for Point Cloud AE
-    Input: Batch of global features B x 1024 x 1
+    """Convolutional Decoder for Point Cloud AE
+    Input: Batch of global features B x 1088 x N
     Output: reconstructed points B x 3 x N
     """
-    def __init__(self, point_dim, num_points):
+    def __init__(self):
         super(Decoder, self).__init__()
-        self.point_dim = point_dim
-        self.num_points = num_points
-        self.fc1 = nn.Linear(in_features=1024, out_features=1024)
-        self.fc2 = nn.Linear(in_features=1024, out_features=1024)
-        self.fc3 = nn.Linear(in_features=1024, out_features=num_points*3)
-
-        self.bn_fc1 = nn.BatchNorm1d(1024)
-        self.bn_fc2 = nn.BatchNorm1d(1024)
+        self.conv1 = torch.nn.Conv1d(1088, 512, 1)
+        self.conv2 = torch.nn.Conv1d(512, 256, 1)
+        self.conv3 = torch.nn.Conv1d(256, 128, 1)
+        self.conv4 = torch.nn.Conv1d(128, 3, 1)
+        self.bn1 = nn.BatchNorm1d(512)
+        self.bn2 = nn.BatchNorm1d(256)
+        self.bn3 = nn.BatchNorm1d(128)
 
     def forward(self, x):
-        batch_size = x.shape[0]
-
         #decoder
-        x = F.relu(self.bn_fc1(self.fc1(x)))
-        x = F.relu(self.bn_fc2(self.fc2(x)))
-        reconstructed_points = self.fc3(x)
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn3(self.conv3(x)))
+        x = self.conv4(x)
 
-        #do reshaping
-        reconstructed_points = reconstructed_points.reshape(batch_size, self.point_dim, self.num_points)
-
-        return reconstructed_points
+        return x
 
 class PointNet_AE(nn.Module):
     """ Autoencoder for Point Cloud 
     Input: Batch of Point Cloud B x 3 x N
     Output: Batch of reconstructed points, extracted global features
     """
-    def __init__(self, point_dim, num_points):
+    def __init__(self):
         super(PointNet_AE, self).__init__()
 
-        self.encoder = PointNet_Encoder(point_dim)
-        self.decoder = Decoder(point_dim, num_points)
+        self.encoder = PointNet_Encoder()
+        self.decoder = Decoder()
 
     def forward(self, x):
         # encode
@@ -89,7 +89,7 @@ class PointNet_AE(nn.Module):
 
 if __name__ == "__main__":
     ## Sanity Check
-    model = PointNet_AE(3, 2048)
+    model = PointNet_AE()
     
     # GPU check                
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -99,14 +99,15 @@ if __name__ == "__main__":
         print("Run on CPU...")
 
     # Generator Definition  
+    n_pts = 4096
     model = model.to(device)
-    summary(model, (3,2048))
+    summary(model, (3,n_pts))
 
     # Test forward pass
-    z = torch.randn(5,3,2048)
+    z = torch.randn(5,3,n_pts)
     z = z.to(device)
     out, gf = model(z)
     # Check output shape
-    assert(out.detach().cpu().numpy().shape == (5,3,2048))
-    assert(gf.detach().cpu().numpy().shape == (5,1024))
+    print(out.detach().cpu().numpy().shape)
+    print(gf.detach().cpu().numpy().shape)
     print("Forward pass successful")
